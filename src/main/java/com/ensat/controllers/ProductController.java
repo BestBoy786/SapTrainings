@@ -4,26 +4,17 @@ import com.ensat.entities.Product;
 import com.ensat.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-
-
-
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Product controller.
  */
-@RestController("/products")
+@RestController
+@RequestMapping("/products")  // Use @RequestMapping for the base path
 public class ProductController {
-     @Autowired
-     private ProductService productService;
 
-   
+    @Autowired
+    private ProductService productService;
 
     /**
      * List all products.
@@ -31,11 +22,11 @@ public class ProductController {
      * @param model
      * @return
      */
-   @GetMapping("/")
+    @GetMapping
     public String list(Model model) {
         model.addAttribute("products", productService.listAllProducts());
         System.out.println("Returning products:");
-        return "products";
+        return "products";  // This will render the list of products
     }
 
     /**
@@ -48,42 +39,48 @@ public class ProductController {
     @GetMapping("/{id}")
     public String showProduct(@PathVariable Integer id, Model model) {
         model.addAttribute("product", productService.getProductById(id));
-        return "productshow";
-    }
-
-    // Afficher le formulaire de modification du Product
-    @PutMapping("/edit/{id}")
-    public String edit(@PathVariable Integer id, Model model) {
-        model.addAttribute("product", productService.getProductById(id));
-        return "productform";
+        return "productshow";  // This will render the product details
     }
 
     /**
-     * New product.
+     * Show form to edit a product.
+     *
+     * @param id
+     * @param model
+     * @return
+     */
+    @PutMapping("/edit/{id}")
+    public String edit(@PathVariable Integer id, Model model) {
+        model.addAttribute("product", productService.getProductById(id));
+        return "productform";  // This will render the product form for editing
+    }
+
+    /**
+     * Show form for creating a new product.
      *
      * @param model
      * @return
      */
-    @RequestMapping("product/new")
+    @GetMapping("/new")  // Changed to "/new" to avoid conflict
     public String newProduct(Model model) {
         model.addAttribute("product", new Product());
-        return "productform";
+        return "productform";  // This will render the form for new product
     }
 
     /**
-     * Save product to database.
+     * Save the product to the database.
      *
      * @param product
      * @return
      */
-    @RequestMapping(value = "product", method = RequestMethod.POST)
+    @PostMapping  // Use @PostMapping without specifying the path to match the base URL
     public String saveProduct(Product product) {
         productService.saveProduct(product);
-        return "redirect:/product/" + product.getId();
+        return "redirect:/products/" + product.getId();  // Redirect to the newly created product's page
     }
 
     /**
-     * Delete product by its id.
+     * Delete a product by its id.
      *
      * @param id
      * @return
@@ -91,7 +88,6 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public String delete(@PathVariable Integer id) {
         productService.deleteProduct(id);
-        return "redirect:/products";
+        return "redirect:/products";  // Redirect to the product list
     }
-
 }
